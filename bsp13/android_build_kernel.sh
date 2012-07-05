@@ -31,13 +31,9 @@ $ECHO -n "You've choosen device: "; warn ${TARGET_DEVICE:-UNKNOWN_DEVICE}
 $ECHO -n "Select "; warn ${CONFIG_TYPE:-UNKNOWN_CONFIG_TYPE}
 
 DEFAULT_CMD_OPT_LIST=(-c -d -m)
-[ $# != 0 ] && { 
-    CMD_OPT_LIST=$@; 
-    NEED_CONFIRM=0; 
-} || {
-    CMD_OPT_LIST=${DEFAULT_CMD_OPT_LIST[@]};
-    NEED_CONFIRM=1;
-}
+[ $# != 0 ] && { CMD_OPT_LIST=$@; } || { CMD_OPT_LIST=${DEFAULT_CMD_OPT_LIST[@]}; }
+NEED_CONFIRM=1
+for opt in $@; do [ "$opt" = "-y" ] && { NEED_CONFIRM=0; break; } done
 
 for opt in ${CMD_OPT_LIST[@]}; do
     case $opt in
@@ -50,11 +46,14 @@ for opt in ${CMD_OPT_LIST[@]}; do
         -m) $ECHO "\nRun menuconfig"
             prompt_for_confirm && make menuconfig
             ;;
-         *) warn "\nUnknow option: $opt, Available options are:\n" \
-             "-c  make distclean\n" \
-             "-d  make $CONFIG_TYPE\n" \
-             "-m  make menuconfig\n"
-            ;;
+        -y) ;;
+        *) warn "\nUnknow option: $opt, Available options are:\n" \
+            "-y  say y to all confirmation" \
+            "-c  make distclean\n" \
+            "-d  make $CONFIG_TYPE\n" \
+            "-m  make menuconfig\n"
+            exit 1
+        ;;
     esac
 done
 

@@ -548,6 +548,14 @@ function warn() {
 export ECHO
 export -f warn
 
+function get_process_cnt_for_build() {
+    PROCESSOR_CNT=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
+    $ECHO $PROCESSOR_CNT
+}
+[ -z "$MAKEFLAGS" ] && MAKEFLAGS=-j$(get_process_cnt_for_build)
+export MAKEFLAGS
+warn "Do all the make with MAKEFLAGS=$MAKEFLAGS"
+
 function prompt_for_confirm() {
     local user_confirm
     $ECHO -n "Are you sure to do the action? [y/n] default:[n] "
@@ -640,19 +648,29 @@ function bkernel() {
     return $ret
 }
 
+function bramdisk() {
+    croot
+    chk_lunch_and_rerun
+    make $ANDROID_PRODUCT_OUT/ramdisk.img
+    local ret=$?
+    warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
+}
+
 MKBOOTIMG=out/host/linux-x86/bin/mkbootimg
 
 function bboot() {
+    croot
+    chk_lunch_and_rerun
     [ ! -e "$ANDROID_PRODUCT_OUT/kernel" ] && { 
         warn "kernel isn't built yet. build now.";
         bkernel $@;
     }
-    croot
-    $MKBOOTIMG --kernel $ANDROID_PRODUCT_OUT/kernel \
-        --ramdisk $ANDROID_PRODUCT_OUT/ramdisk.img \
-        --cmdline "no_console_suspend=1 console=null" \
-        --base 0x43800000 \
-        --output $ANDROID_PRODUCT_OUT/boot.img
+#   $MKBOOTIMG --kernel $ANDROID_PRODUCT_OUT/kernel \
+#       --ramdisk $ANDROID_PRODUCT_OUT/ramdisk.img \
+#       --cmdline "no_console_suspend=1 console=null" \
+#       --base 0x43800000 \
+#       --output $ANDROID_PRODUCT_OUT/boot.img
+    make $ANDROID_PRODUCT_OUT/boot.img
     local ret=$?
     warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
 }
@@ -660,7 +678,25 @@ function bboot() {
 function bsystem() {
     croot
     chk_lunch_and_rerun
-    [ x$1 = x-c ] && make clean
+    NEED_CONFIRM=1
+    for opt in $@; do [ "$opt" = "-y" ] && { NEED_CONFIRM=0; break; } done
+    for opt in $@; do
+        case $opt in
+        -c) $ECHO "make clean, will delete out directory"
+            #prompt_for_confirm && make clean
+            prompt_for_confirm && echo "fake make clean" 
+            shift
+            ;;
+        -y) shift
+            ;;
+        -h) warn "\nUsage: $opt, Available options are:\n" \
+            "-y  say y to all confirmation\n" \
+            "-c  make clean\n"
+            return 1
+            ;;
+        esac
+    done
+
     [ -d android_obj ] && sh -x build/rel_obj_put_back.sh
     schedtool -B -n 1 -e ionice -n 1 make $@
     local ret=$?
@@ -669,49 +705,57 @@ function bsystem() {
 }
 
 function brecovery() {
+    croot
+    chk_lunch_and_rerun
     [ ! -e "$ANDROID_PRODUCT_OUT/kernel" ] && { 
         warn "kernel isn't built yet. build now.";
         bkernel;
     }
-    [ ! -e "$PRODUCT_IMG_DIR/ramdisk-recovery.img" ] && {
-        warn "system isn't built yet. build now.";
-        bsystem;
-    }
-    croot
-    $MKBOOTIMG --kernel $ANDROID_PRODUCT_OUT/kernel \
-        --ramdisk $ANDROID_PRODUCT_OUT/ramdisk-recovery.img \
-        --cmdline "no_console_suspend=1 console=null" \
-        --base 0x43800000 \
-        --output $ANDROID_PRODUCT_OUT/recovery.img
+#   [ ! -e "$PRODUCT_IMG_DIR/ramdisk-recovery.img" ] && {
+#       warn "system isn't built yet. build now.";
+#       bsystem;
+#   }
+#   $MKBOOTIMG --kernel $ANDROID_PRODUCT_OUT/kernel \
+#       --ramdisk $ANDROID_PRODUCT_OUT/ramdisk-recovery.img \
+#       --cmdline "no_console_suspend=1 console=null" \
+#       --base 0x43800000 \
+#       --output $ANDROID_PRODUCT_OUT/recovery.img
+    make $ANDROID_PRODUCT_OUT/recovery.img
     local ret=$?
     warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
 }
 
 function ball() {
+    NEED_CONFIRM=1
+    local CONFIRM_OPT
+    for opt in $@; do
+        case $opt in
+        -y) NEED_CONFIRM=0
+            CONFIRM_OPT="-y"
+            ;;
+        *)  warn "Unknown arguments $opt. only -y is available"
+            return 1
+            ;;
+        esac
+    done
+
     warn "This will clean all previous builds.\n" \
         "And will do a complete build then.\n" \
         "It will takes a long time."
     prompt_for_confirm &&
-    bbarebox -c -d &&
-    bboot -c -d &&
-    bsystem -c &&
+    bbarebox $CONFIRM_OPT -c -d &&
+    bboot $CONFIRM_OPT -c -d &&
+    bsystem $CONFIRM_OPT -c &&
     warn "All build is succeed!" ||
     warn "Some build is failed! Please check!"
 
 }
 
-function get_process_cnt_for_build() {
-    PROCESSOR_CNT=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
-    $ECHO $PROCESSOR_CNT
-}
-[ -z "$MAKEFLAGS" ] && MAKEFLAGS=-j$(get_process_cnt_for_build)
-export MAKEFLAGS
-warn "do all the make with MAKEFLAGS=$MAKEFLAGS"
 
 export ENVSETUP_SOURCED=1
 
 function mka() {
-schedtool -B -n 1 -e ionice -n 1 make -j $(($(cat /proc/cpuinfo | grep "^processor" | wc -l)*2)) "$@"
+    schedtool -B -n 1 -e ionice -n 1 make -j `cat /proc/cpuinfo | grep "^processor" | wc -l` "$@"
 }
 
 unset INFOMAX_BRUNCH_MENU_CHOICES
@@ -897,11 +941,6 @@ function infomax_brunch()
             cp out/target/product/$DEVICE_NAME_TYPE/system.img infomax_images/system.img_$DEVICE_NAME_TYPE
             echo "system.img_$DEVICE_NAME_TYPE has been created into infomax_images/."
         fi
-        if [ -e out/target/product/$DEVICE_NAME_TYPE/userdata.img ]
-        then
-            cp out/target/product/$DEVICE_NAME_TYPE/userdata.img infomax_images/userdata.img_$DEVICE_NAME_TYPE
-            echo "userdata.img_$DEVICE_NAME_TYPE has been created into infomax_images/."
-        fi
     elif [ "$selection" = all ]
     then
         echo "Build barebox"
@@ -920,11 +959,11 @@ function infomax_brunch()
         cd ../
         echo "Build Android"
         lunch $ANDROID_SYSTEM_TYPE
-        make -j4 clean
+        make clean
 
-        if [ -d android_obj ]; then
-            sh -x build/rel_obj_put_back.sh
-        fi
+	if [ -d android_obj ]; then
+		sh -x build/rel_obj_put_back.sh
+	fi
 
         mka
         if [ -e out/target/product/$DEVICE_NAME_TYPE/boot.img ]
@@ -941,11 +980,6 @@ function infomax_brunch()
         then
             cp out/target/product/$DEVICE_NAME_TYPE/system.img infomax_images/system.img_$DEVICE_NAME_TYPE
             echo "system.img_$DEVICE_NAME_TYPE has been created into infomax_images/."
-        fi
-        if [ -e out/target/product/$DEVICE_NAME_TYPE/userdata.img ]
-        then
-            cp out/target/product/$DEVICE_NAME_TYPE/userdata.img infomax_images/userdata.img_$DEVICE_NAME_TYPE
-            echo "userdata.img_$DEVICE_NAME_TYPE has been created into infomax_images/."
         fi
     fi
 
