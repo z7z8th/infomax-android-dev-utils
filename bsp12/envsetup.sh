@@ -103,13 +103,11 @@ function setpaths()
     # and in with the new
     CODE_REVIEWS=
     prebuiltdir=$(getprebuilt)
-    export ANDROID_EABI_TOOLCHAIN=$prebuiltdir/toolchain/arm-linux-androideabi-4.4.x/bin
+    export ANDROID_EABI_TOOLCHAIN=$prebuiltdir/toolchain/arm-eabi-4.4.0/bin
     export ANDROID_TOOLCHAIN=$ANDROID_EABI_TOOLCHAIN
     export ANDROID_QTOOLS=$T/development/emulator/qtools
     export ANDROID_BUILD_PATHS=:$(get_build_var ANDROID_BUILD_PATHS):$ANDROID_QTOOLS:$ANDROID_TOOLCHAIN:$ANDROID_EABI_TOOLCHAIN$CODE_REVIEWS
     export PATH=$PATH$ANDROID_BUILD_PATHS
-    ## export the JAVA path
-    export PATH=$JAVA_HOME/bin:$PATH
 
     unset ANDROID_PRODUCT_OUT
     export ANDROID_PRODUCT_OUT=$(get_abs_build_var PRODUCT_OUT)
@@ -152,7 +150,7 @@ function set_stuff_for_environment()
 
 function set_sequence_number()
 {
-    export BUILD_ENV_SEQUENCE_NUMBER=10
+    export BUILD_ENV_SEQUENCE_NUMBER=9
 }
 
 function settitle()
@@ -604,15 +602,15 @@ function create_im_links() {
     warn "create links"
     croot
     chk_lunch_and_rerun
-    local IM_KERNEL_VERSION="kernel_3.0"
-    local IM_BAREBOX_VERSION="barebox_2010.10"
-    # for different kernel version
-    [ -e kernel -a ! -L kernel ] && { warn "kernel exists, but is not a symbolic link."; return; }
-    ln -sfT $IM_KERNEL_VERSION/ kernel
-    
-    # for different barebox version
-    [ -e barebox -a ! -L barebox ] && { warn "barebox exists, but is not a symbolic link."; return; }
-    ln -sfT $IM_BAREBOX_VERSION/ barebox
+    #local IM_KERNEL_VERSION="kernel_3.0"
+    #local IM_BAREBOX_VERSION="barebox_2010.10"
+    ## for different kernel version
+    #[ -e kernel -a ! -L kernel ] && { warn "kernel exists, but is not a symbolic link."; return; }
+    #ln -sfT $IM_KERNEL_VERSION/ kernel
+    #
+    ## for different barebox version
+    #[ -e barebox -a ! -L barebox ] && { warn "barebox exists, but is not a symbolic link."; return; }
+    #ln -sfT $IM_BAREBOX_VERSION/ barebox
 
     INFOMAX_IMG_DIR=infomax_images
     export INFOMAX_IMG_DIR
@@ -640,6 +638,13 @@ function bbarebox() {
     return $ret
 }
 
+function fix_blcr(){
+    croot
+    cd external/$BLCR_VERSION
+    ./run.sh
+    cd ../../
+}
+
 function bkernel() {
     croot
     chk_lunch_and_rerun
@@ -665,10 +670,10 @@ function bramdisk() {
 function bboot() {
     croot
     chk_lunch_and_rerun
-    #[ ! -e "$ANDROID_REL_PRODUCT_OUT/kernel" ] && { 
-    #    warn "kernel isn't built yet. build now.";
+    [ ! -e "$ANDROID_REL_PRODUCT_OUT/kernel" ] && { 
+        warn "kernel isn't built yet. build now.";
         bkernel $@;
-    #}
+    }
     make $ANDROID_REL_PRODUCT_OUT/boot.img
     local ret=$?
     warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
@@ -677,6 +682,7 @@ function bboot() {
 function bsystem() {
     croot
     chk_lunch_and_rerun
+    fix_blcr
     NEED_CONFIRM=1
     for opt in $@; do [ "$opt" = "-y" ] && { NEED_CONFIRM=0; break; } done
     for opt in $@; do
@@ -755,13 +761,15 @@ function mka() {
 
 unset INFOMAX_BRUNCH_MENU_CHOICES
 INFOMAX_BRUNCH_MENU_CHOICES=(barebox boot recovery system all)
+## specifi BLCR version to build
+BLCR_VERSION="blcr-0.8.4"
 function infomax_brunch()
 {
 
     BOARD_LIST=( iM9816 iM9828_EVB_V1 iM9828_EVB_V2 iM9828_EVB_V3 iM9828_EVB_V3_WVGA)
     DEVICE_NAME_LIST=( iM9816 iM9828_evb_v1 iM9828_evb_v2 iM9828_evb_v3 iM9828_evb_v3_wvga)
     ANDROID_BOARD_LIST=( device/infomax/iM9816 device/infomax/iM9828_evb_v1 device/infomax/iM9828_evb_v2 device/infomax/iM9828_evb_v3 device/infomax/iM9828_evb_v3_wvga)
-    ANDROID_SYSTEM_LIST=( generic_iM9816-eng generic_iM9828_evb_v1-eng generic_iM9828_evb_v2-eng full_iM9828_evb_v3-eng full_iM9828_evb_v3_wvga-eng)
+    ANDROID_SYSTEM_LIST=( generic_iM9816-eng generic_iM9828_evb_v1-eng generic_iM9828_evb_v2-eng generic_iM9828_evb_v3-eng generic_iM9828_evb_v3_wvga-eng)
 
     if [ "$2" ] ; then
         BOARD_NUMBER=$2
@@ -778,19 +786,6 @@ function infomax_brunch()
     DEVICE_NAME_TYPE=${DEVICE_NAME_LIST[$BOARD_NUMBER]}
     ANDROID_BOARD_TYPE=${ANDROID_BOARD_LIST[$BOARD_NUMBER]}
     ANDROID_SYSTEM_TYPE=${ANDROID_SYSTEM_LIST[$BOARD_NUMBER]}
-    KERNEL_VERSION="kernel_3.0"
-    BAREBOX_VERSION="barebox_2010.10"
-    ## for different kernel version
-    if [ -e kernel ] ; then
-       rm kernel
-    fi
-    ln -s $KERNEL_VERSION/ kernel
-
-    ## for different barebox version
-    if [ -e barebox ] ; then
-      rm barebox
-    fi
-    ln -s $BAREBOX_VERSION/ barebox
 
     local selection
     if [ "$1" ] ; then
@@ -841,13 +836,18 @@ function infomax_brunch()
     elif [ "$selection" = boot ]
     then
         echo "Build Linux Kernel"
-        cd $KERNEL_VERSION/
+        cd kernel/
         ./mkScript.sh $BOARD_NUMBER
         if [ -e arch/arm/boot/zImage ]
         then
             cp arch/arm/boot/zImage ../infomax_images/
             echo "arch/arm/boot/zImage has been copied into infomax_images/."
         fi
+        ## ARKT for BLCR.b
+        cd ../external/$BLCR_VERSION
+        ./run.sh
+        cd ../
+        ## ARKT for BLCR.e
         cd ../
         echo "Create Boot Image"
         if [ ! -e infomax_images/zImage ]
@@ -872,13 +872,18 @@ function infomax_brunch()
     elif [ "$selection" = recovery ]
     then
         echo "Build Linux Kernel"
-        cd $KERNEL_VERSION/
+        cd kernel/
         ./mkScript.sh $BOARD_NUMBER
         if [ -e arch/arm/boot/zImage ]
         then
             cp arch/arm/boot/zImage ../infomax_images/
             echo "arch/arm/boot/zImage has been copied into infomax_images/."
         fi
+        ## ARKT for BLCR.b
+        cd ../external/$BLCR_VERSION
+        ./run.sh
+        cd ../
+        ## ARKT for BLCR.e
         cd ../
         echo "Create Recovery Image"
         if [ ! -e infomax_images/zImage ]
@@ -910,9 +915,26 @@ function infomax_brunch()
             echo "Build Linux kernel first."
             echo
             echo "Build Linux Kernel..."
-            cd $KERNEL_VERSION/
+            cd kernel/
             ./mkScript.sh $BOARD_NUMBER all
+            ## ARKT for BLCR.b
+            cd ../external/$BLCR_VERSION
+            ./run.sh
             cd ../
+            ## ARKT for BLCR.e
+            cd ../
+        fi
+        ## check if blcr is built
+        if [ ! -e external/$BLCR_VERSION/include/blcr_common.h ]
+        then
+            echo ""
+            echo ""
+            echo "!!!!!!!!! BLCR header file not generated, built first.  !!!!!!"
+            echo ""
+            echo ""
+            cd external/$BLCR_VERSION
+            ./run.sh
+            cd ../..
         fi
         lunch $ANDROID_SYSTEM_TYPE
 
@@ -949,8 +971,13 @@ function infomax_brunch()
         fi
         cd ../
         echo "Build Linux Kernel"
-        cd $KERNEL_VERSION/
+        cd kernel/
         ./mkScript.sh $BOARD_NUMBER all
+        ## ARKT for BLCR.b
+        cd ../external/$BLCR_VERSION
+        ./run.sh
+        cd ../
+        ## ARKT for BLCR.e
         cd ../
         echo "Build Android"
         lunch $ANDROID_SYSTEM_TYPE
@@ -1509,7 +1536,7 @@ if [ "$STAY_OFF_MY_LAWN" = "" ]; then
                 export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/1.5/Home
                 ;;
             *)
-                export JAVA_HOME=/usr/lib/jvm/java-1.6.0_25-sun
+                export JAVA_HOME=/usr/lib/jvm/java-1.5.0-sun
                 ;;
         esac
     fi

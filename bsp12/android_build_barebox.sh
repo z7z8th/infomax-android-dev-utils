@@ -4,22 +4,26 @@
 [ -z "$TARGET_DEVICE" ] && { warn "please run lunch first. exiting..."; exit 1;}
 
 ECHO="echo -e"
-warn "\nBuild kernel\n"
+warn "\nBuild barebox\n"
 
-# export PATH=../prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
-export PATH=../prebuilt/linux-x86/toolchain/arm-linux-androideabi-4.4.x/bin:$PATH
+export PATH=../prebuilt/linux-x86/toolchain/BSP12_arm-eabi-4.4.0/bin:$PATH
 export ARCH=arm
-#export CROSS_COMPILE=arm-eabi-
-export CROSS_COMPILE=arm-linux-androideabi-
+export CROSS_COMPILE=arm-eabi-
 
-CONFIG_LIST=( im9828v1_android_defconfig 
-              im9828v1_android_defconfig 
-              im9828v2_android_defconfig 
-              im9828v3_android_defconfig 
-              im9828v3_wvga_android_defconfig)
+cat  >include/git_commit.h  <<EOF
+#if defined(GIT_COMMIT)
+#define GIT_RELEASE GIT_COMMIT
+#else
+#define GIT_RELEASE " export"
+#endif
+EOF
 
-BUILD=""
-BUILD_MODULES="modules"
+CONFIG_LIST=( im9828v1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im9828v1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im9828v2_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im9828v3_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im9828v3_wvga_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig)
+
 
 eval "IM_DEVICE_NAME_LIST=(${X_IM_DEVICE_NAME_LIST[*]})"
 BOARD_NUMBER=$(get_dev_name_index $TARGET_DEVICE)
@@ -34,6 +38,7 @@ DEFAULT_CMD_OPT_LIST=(-c -d -m)
 [ $# != 0 ] && { CMD_OPT_LIST=$@; } || { CMD_OPT_LIST=${DEFAULT_CMD_OPT_LIST[@]}; }
 NEED_CONFIRM=1
 for opt in $@; do [ "$opt" = "-y" ] && { NEED_CONFIRM=0; break; } done
+
 
 for opt in ${CMD_OPT_LIST[@]}; do
     case $opt in
@@ -58,35 +63,20 @@ for opt in ${CMD_OPT_LIST[@]}; do
 done
 
 
-#Copy release object files back if the obj directroy exists
-if [ -d ../kernel_obj ] ; then
-    $ECHO "This is a release version"
-    $ECHO "Copying object files for the compilation"
-    sh rel_obj_put_back.sh
-    $ECHO "Copying done"
-fi
+$ECHO "=====================Building========================="
+make
 
-$ECHO "====================Building====================="
-make $BUILD
+#[ -z "$ANDROID_PRODUCT_OUT" ] && echo fuck ANDROID_PRODUCT_OUT is null
 
 if [ $? = 0 ]; then
     mkdir -p $ANDROID_PRODUCT_OUT
-    cp arch/arm/boot/zImage $ANDROID_PRODUCT_OUT/kernel
-    cp arch/arm/boot/zImage ../device/infomax/$TARGET_DEVICE/kernel
-    git log -n 1 > $ANDROID_PRODUCT_OUT/kernel.version
-    $ECHO "\n=== kernel Build Completed Sucessfully. ==="
+    cp barebox.bin $ANDROID_PRODUCT_OUT
+
+    $ECHO "\n=== Barebox Build Completed Sucessfully. ==="
     $ECHO "=== please find the image at infomax_images ===\n"
     exit 0
 else
-    $ECHO "\n*** kernel Build Failed. ***\n"
+    $ECHO "\n*** Barebox Build Failed. ***\n"
     exit 1
 fi
-
-#$ECHO "make modules"
-#$ECHO "=================================================="
-#make $BUILD_MODULES
-#$ECHO "=================================================="
-#$ECHO " Copy kernel modules to ../vendor/infomax/iM9815 "
-#$ECHO "=================================================="
-#find . -name *.ko | xargs cp -f -t ../vendor/infomax/iM9815
 

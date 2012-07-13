@@ -1,0 +1,39 @@
+## adb protocol on passion (Nexus One)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4e12", MODE="0600", OWNER="z7z8th"
+## fastboot protocol on passion (Nexus One)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", ATTR{idProduct}=="0fff", MODE="0600", OWNER="z7z8th"
+## adb protocol on crespo/crespo4g (Nexus S)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4e22", MODE="0600", OWNER="z7z8th"
+## fastboot protocol on crespo/crespo4g (Nexus S)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4e20", MODE="0600", OWNER="z7z8th"
+## adb protocol on stingray/wingray (Xoom)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="22b8", ATTR{idProduct}=="70a9", MODE="0600", OWNER="z7z8th"
+## fastboot protocol on stingray/wingray (Xoom)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="708c", MODE="0600", OWNER="z7z8th"
+## adb protocol on maguro/toro (Galaxy Nexus)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", ATTR{idProduct}=="6860", MODE="0600", OWNER="z7z8th"
+## fastboot protocol on maguro/toro (Galaxy Nexus)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4e30", MODE="0600", OWNER="z7z8th"
+## adb protocol on panda (PandaBoard)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="d101", MODE="0600", OWNER="z7z8th"
+## fastboot protocol on panda (PandaBoard)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="d022", MODE="0600", OWNER="z7z8th"
+## usbboot protocol on panda (PandaBoard)
+#SUBSYSTEM=="usb", ATTR{idVendor}=="0451", ATTR{idProduct}=="d010", MODE="0600", OWNER="z7z8th"
+
+# infomax
+SUBSYSTEM=="usb", ATTR{idVendor}=="067b", ATTR{idProduct}=="2303", MODE="0600", OWNER="z7z8th"
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="d002", MODE="0600", OWNER="z7z8th"
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="9018", MODE="0600", OWNER="z7z8th"
+
+# android 4.0, Google Inc.
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="1960", MODE="0600", OWNER="z7z8th"
+# usb download mode.
+# Macronix International Co., Ltd, 0851:0002
+SUBSYSTEM=="scsi_generic", ATTRS{vendor}=="Infomax*", ATTRS{model}=="Flash Disk*", MODE="0600", OWNER="z7z8th"
+SUBSYSTEM=="scsi_generic", ATTRS{vendor}=="z7z8th*", ATTRS{model}=="disk*", MODE="0600", OWNER="z7z8th"
+
+#ACTION=="add", SUBSYSTEM=="usb", RUN+="/sbin/rmmod usb_storage"
+#[13:0:0:0]   disk    Infomax  Flash Disk       0001  /dev/sdc  /dev/sg3
+#[13:0:0:1]   disk    Infomax  Flash Disk       0001  /dev/sdd  /dev/sg4
+

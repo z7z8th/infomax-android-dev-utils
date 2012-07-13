@@ -9,8 +9,8 @@ warn "\nBuild kernel\n"
 # export PATH=../prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
 export PATH=../prebuilt/linux-x86/toolchain/arm-linux-androideabi-4.4.x/bin:$PATH
 export ARCH=arm
-#export CROSS_COMPILE=arm-eabi-
-export CROSS_COMPILE=arm-linux-androideabi-
+export CROSS_COMPILE=arm-eabi-
+#export CROSS_COMPILE=arm-linux-androideabi-
 
 CONFIG_LIST=( im9828v1_android_defconfig 
               im9828v1_android_defconfig 
@@ -72,7 +72,6 @@ make $BUILD
 if [ $? = 0 ]; then
     mkdir -p $ANDROID_PRODUCT_OUT
     cp arch/arm/boot/zImage $ANDROID_PRODUCT_OUT/kernel
-    cp arch/arm/boot/zImage ../device/infomax/$TARGET_DEVICE/kernel
     git log -n 1 > $ANDROID_PRODUCT_OUT/kernel.version
     $ECHO "\n=== kernel Build Completed Sucessfully. ==="
     $ECHO "=== please find the image at infomax_images ===\n"
