@@ -3,18 +3,6 @@
 this_java_ver='1.5.0'
 this_java_ver_grep='1\.5\.0'
 this_java_dir="java-${this_java_ver}-sun"
-{ update-alternatives --query java | grep "Value:.*${this_java_dir}"; } && \
-    { update-alternatives --query javac | grep "Value:.*${this_java_dir}"; } && \
-        { update-alternatives --query javaws | grep "Value:.*${this_java_dir}"; } || \
-{ 
-    echo "change java* to $this_java_dir"
-    sudo update-alternatives --set java /usr/lib/jvm/${this_java_dir}/jre/bin/java ;
-    sudo update-alternatives --set javac /usr/lib/jvm/${this_java_dir}/bin/javac ;
-    sudo update-alternatives --set javaws /usr/lib/jvm/${this_java_dir}/jre/bin/javaws ;
-}
-
-java -version 2>&1 | grep "^java version \"${this_java_ver_grep}" || { echo -e "**** ERROR **** \nneed java version $this_java_ver_grep"; return 1; }
-javac -version 2>&1 | grep "^javac ${this_java_ver_grep}" || { echo -e "**** ERROR **** \nneed javac $this_java_ver_grep"; return 1; }
 
 
 #### configs below is not portable, do *not* copy directly ####
@@ -32,3 +20,15 @@ export PATH=$PATH:$(pwd)/out/host/linux-x86/bin
 
 source build/envsetup.sh
 
+{ update-alternatives --query java | grep "Value:.*${this_java_dir}"; } && \
+    { update-alternatives --query javac | grep "Value:.*${this_java_dir}"; } && \
+        { update-alternatives --query javaws | grep "Value:.*${this_java_dir}"; } || \
+{ 
+    echo "change java* to $this_java_dir"
+    sudo update-alternatives --set java /usr/lib/jvm/${this_java_dir}/jre/bin/java ;
+    sudo update-alternatives --set javac /usr/lib/jvm/${this_java_dir}/bin/javac ;
+    sudo update-alternatives --set javaws /usr/lib/jvm/${this_java_dir}/jre/bin/javaws ;
+}
+
+java -version 2>&1 | grep "^java version \"${this_java_ver_grep}" || { echo -e "**** ERROR **** \nneed java version $this_java_ver_grep"; return 1; }
+javac -version 2>&1 | grep "^javac ${this_java_ver_grep}" || { echo -e "**** ERROR **** \nneed javac $this_java_ver_grep"; return 1; }
