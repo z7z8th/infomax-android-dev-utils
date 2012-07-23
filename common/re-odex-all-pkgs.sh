@@ -72,23 +72,23 @@ function reodex_framework_components() {
 function reodex_system_apps() {
     #echo "OBJ_APPS_DIR=$OBJ_APPS_DIR"
     SYSTEM_APP_LIST='
-    ApplicationsProvider
+    ApplicationsProvider:shared.x509.pem:shared.pk8
     BackupRestoreConfirmation
     Bluetooth
     Browser
     Calculator
     Calendar
-    CalendarProvider
+    CalendarProvider:testkey.x509.pem:testkey.pk8
     Camera
     CertInstaller
-    Contacts
-    ContactsProvider
+    Contacts:shared.x509.pem:shared.pk8
+    ContactsProvider:shared.x509.pem:shared.pk8
     DefaultContainerService
     DeskClock
     Development
-    DownloadProvider
-    DownloadProviderUi
-    DrmProvider
+    DownloadProvider:media.x509.pem:media.pk8
+    DownloadProviderUi:media.x509.pem:media.pk8
+    DrmProvider:media.x509.pem:media.pk8
     Email
     Exchange
     Gallery2
@@ -96,7 +96,7 @@ function reodex_system_apps() {
     KeyChain
     LatinIME
     Launcher2
-    MediaProvider
+    MediaProvider:media.x509.pem:media.pk8
     Mms
     Music
     MusicFX
@@ -112,15 +112,26 @@ function reodex_system_apps() {
     SpeechRecorder
     SystemUI
     TelephonyProvider
-    UserDictionaryProvider
+    UserDictionaryProvider:shared.x509.pem:shared.pk8
     VpnDialogs
     '
 
     #find $OBJ_APPS_DIR/ -name 'package.apk.unsigned' | while read UNSIGNED_APK_PATH;
-    for APK_NAME in $SYSTEM_APP_LIST;
+    for APK_ITEM in $SYSTEM_APP_LIST;
     do
         echo 
+        APK_NAME=`echo $APK_ITEM | cut -d : -f 1`
+        echo $APK_ITEM | grep -q ':' && {
+            PEM_FILE=`echo $APK_ITEM | cut -d : -f 2`;
+            PK8_FILE=`echo $APK_ITEM | cut -d : -f 3`;
+        } || {
+            PEM_FILE=platform.x509.pem
+            PK8_FILE=platform.pk8
+        }
         echo "APK_NAME=$APK_NAME"
+        echo "PEM_FILE=$PEM_FILE"
+        echo "PK8_FILE=$PK8_FILE"
+
         INTERMEDIATES_APK_DIR=$OBJ_APPS_DIR/${APK_NAME}_intermediates
         UNSIGNED_APK_PATH=$INTERMEDIATES_APK_DIR/package.apk.unsigned
         APK_PATH=$INTERMEDIATES_APK_DIR/package.apk
@@ -133,7 +144,7 @@ function reodex_system_apps() {
         FINAL_ODEX_PATH=$SYSTEM_APP_DIR/$APK_NAME.odex
 
         echo "APK_PATH=$APK_PATH"
-        java -jar out/host/linux-x86/framework/signapk.jar build/target/product/security/platform.x509.pem build/target/product/security/platform.pk8 $UNSIGNED_APK_PATH  $SIGNED_APK_PATH
+        java -jar out/host/linux-x86/framework/signapk.jar build/target/product/security/${PEM_FILE} build/target/product/security/${PK8_FILE} $UNSIGNED_APK_PATH  $SIGNED_APK_PATH
         mv $SIGNED_APK_PATH $APK_PATH
         mv $APK_PATH $UNALIGNED_APK_PATH
         $ZIPALIGN -f 4 $UNALIGNED_APK_PATH $ALIGNED_APK_PATH

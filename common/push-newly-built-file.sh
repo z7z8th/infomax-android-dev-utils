@@ -21,7 +21,7 @@ find $PRODUCT_OUT_DIR/system -newer $PRODUCT_OUT_DIR/system.img | \
         board_file_path=${new_file_path#${PRODUCT_OUT_DIR}};
         board_file_time=`adb shell stat -c '%Y' $board_file_path 2>/dev/null | sed -e 's/\r//g' | grep -x '[0-9]*'`
         [ -z "$board_file_time" ] && {
-            echo "$board_file_path doesn't exists, skip"; continue;
+            echo "*** $board_file_path doesn't exists, skip"; #continue;
         }
         new_file_time=`stat -c '%Y' $new_file_path`
         [ "$new_file_time" -le "${board_file_time:-0}" -a x$PUSH_ALL != x1 ] && {
