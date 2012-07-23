@@ -1,0 +1,47 @@
+#!/bin/sh
+#z7z8th@z7z8th-pc { /opt/android4.0 }
+$ mmm external/apache-xml/
+#============================================
+PLATFORM_VERSION_CODENAME=REL
+PLATFORM_VERSION=4.0.3
+TARGET_PRODUCT=full_iM9828_evb_v3
+TARGET_BUILD_VARIANT=eng
+TARGET_BUILD_TYPE=release
+TARGET_BUILD_APPS=
+TARGET_ARCH=arm
+TARGET_ARCH_VARIANT=armv5te
+HOST_ARCH=x86
+HOST_OS=linux
+HOST_BUILD_TYPE=release
+BUILD_ID=IML74K
+#============================================
+No private recovery resources for TARGET_DEVICE iM9828_evb_v3
+No recovery.fstab for TARGET_DEVICE iM9828_evb_v3
+make: Entering directory `/opt/android4.0'
+mkdir -p out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/
+out/host/linux-x86/bin/acp -fp out/target/common/obj/JAVA_LIBRARIES/apache-xml_intermediates/javalib.jar out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml_nodex.jar
+# remove classes.dex
+out/host/linux-x86/bin/aapt remove out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml_nodex.jar classes.dex
+mkdir -p out/target/product/iM9828_evb_v3/obj/JAVA_LIBRARIES/apache-xml_intermediates/
+
+out/host/linux-x86/bin/acp -fp out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml_nodex.jar out/target/product/iM9828_evb_v3/obj/JAVA_LIBRARIES/apache-xml_intermediates/javalib.jar
+echo "Dexpreopt Boot Jar: out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml.odex"
+
+rm -f out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml.odex
+mkdir -p out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/
+
+out/host/linux-x86/bin/acp -fp out/target/common/obj/JAVA_LIBRARIES/apache-xml_intermediates/javalib.jar out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml.jar
+
+dalvik/tools/dex-preopt --dexopt=host/linux-x86/bin/dexopt --build-dir=out --product-dir=target/product/iM9828_evb_v3/dex_bootjars --boot-dir=system/framework --boot-jars=core:core-junit:bouncycastle:ext:framework:android.policy:services:apache-xml:filterfw --uniprocessor target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml.jar target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml.odex
+
+mkdir -p out/target/product/iM9828_evb_v3/obj/JAVA_LIBRARIES/apache-xml_intermediates/
+out/host/linux-x86/bin/acp -fp out/target/product/iM9828_evb_v3/dex_bootjars/system/framework/apache-xml.odex out/target/product/iM9828_evb_v3/obj/JAVA_LIBRARIES/apache-xml_intermediates/javalib.odex
+
+echo "Install: out/target/product/iM9828_evb_v3/system/framework/apache-xml.odex"
+mkdir -p out/target/product/iM9828_evb_v3/system/framework/
+out/host/linux-x86/bin/acp -fp out/target/product/iM9828_evb_v3/obj/JAVA_LIBRARIES/apache-xml_intermediates/javalib.odex out/target/product/iM9828_evb_v3/system/framework/apache-xml.odex
+echo "Install: out/target/product/iM9828_evb_v3/system/framework/apache-xml.jar"
+mkdir -p out/target/product/iM9828_evb_v3/system/framework/
+out/host/linux-x86/bin/acp -fp out/target/product/iM9828_evb_v3/obj/JAVA_LIBRARIES/apache-xml_intermediates/javalib.jar out/target/product/iM9828_evb_v3/system/framework/apache-xml.jar
+make: Leaving directory `/opt/android4.0'
+
