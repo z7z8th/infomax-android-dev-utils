@@ -15,7 +15,7 @@ case $1 in
     syncdev)
         repo forall -c "git br |grep -q dev && pwd && git co $BSP_BRANCH && repo sync -c . && git co dev && git rebase $BSP_BRANCH && echo "
         ;;
-    bsp13)
+    bsp)
         repo forall -c "git branch | grep -q '^  $BSP_BRANCH' && pwd && git checkout $BSP_BRANCH && echo || echo 'checkout $BSP_BRANCH, already on or not found'"
         ;;
         *)
