@@ -6,7 +6,7 @@ AAPT=out/host/linux-x86/bin/aapt
 ZIPALIGN=out/host/linux-x86/bin/zipalign
 ACP=out/host/linux-x86/bin/acp
 
-DEVICE_TYPE=iM9828_evb_v3
+DEVICE_TYPE=iM98xx_evb_v3
 PRODUCT_OUT_DIR=out/target/product/$DEVICE_TYPE
 OBJ_APPS_DIR=$PRODUCT_OUT_DIR/obj/APPS
 SYSTEM_APP_DIR=$PRODUCT_OUT_DIR/system/app
@@ -91,7 +91,9 @@ function reodex_system_apps() {
     DrmProvider:media.x509.pem:media.pk8
     Email
     Exchange
-    Gallery2
+    FM
+    Gallery:media.x509.pem:media.pk8
+    Gallery2:media.x509.pem:media.pk8
     HTMLViewer
     KeyChain
     LatinIME
