@@ -12,11 +12,11 @@ export ARCH=arm
 export CROSS_COMPILE=arm-eabi-
 #export CROSS_COMPILE=arm-linux-androideabi-
 
-CONFIG_LIST=( im9828v1_android_defconfig 
-              im9828v1_android_defconfig 
-              im9828v2_android_defconfig 
-              im9828v3_android_defconfig 
-              im9828v3_wvga_android_defconfig)
+CONFIG_LIST=( im98xxv1_android_defconfig 
+              im98xxv1_android_defconfig 
+              im98xxv2_android_defconfig 
+              im98xxv3_android_defconfig 
+              im98xxv3_wvga_android_defconfig)
 
 BUILD=""
 BUILD_MODULES="modules"
@@ -67,11 +67,12 @@ if [ -d ../kernel_obj ] ; then
 fi
 
 $ECHO "====================Building====================="
-make $BUILD
+make CONFIG_DEBUG_SECTION_MISMATCH=y $BUILD
 
 if [ $? = 0 ]; then
     mkdir -p $ANDROID_PRODUCT_OUT
-    cp arch/arm/boot/zImage $ANDROID_PRODUCT_OUT/kernel
+#    cp arch/arm/boot/zImage $ANDROID_PRODUCT_OUT/kernel
+    cp arch/arm/boot/zImage ../device/infomax/$TARGET_DEVICE/kernel
     git log -n 1 > $ANDROID_PRODUCT_OUT/kernel.version
     $ECHO "\n=== kernel Build Completed Sucessfully. ==="
     $ECHO "=== please find the image at infomax_images ===\n"

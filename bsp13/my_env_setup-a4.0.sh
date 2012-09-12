@@ -19,6 +19,8 @@ export PATH=$PATH:$(pwd)/out/host/linux-x86/bin
 
 source build/envsetup_infomax.sh
 
+return 0
+
 { update-alternatives --query java | grep "Value:.*${this_java_dir}"; } && \
     { update-alternatives --query javac | grep "Value:.*${this_java_dir}"; } && \
         { update-alternatives --query javaws | grep "Value:.*${this_java_dir}"; } || \

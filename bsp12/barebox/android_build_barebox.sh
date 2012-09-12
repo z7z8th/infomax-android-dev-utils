@@ -18,11 +18,11 @@ cat  >include/git_commit.h  <<EOF
 #endif
 EOF
 
-CONFIG_LIST=( im9828v1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im9828v1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im9828v2_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im9828v3_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im9828v3_wvga_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig)
+CONFIG_LIST=( im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im98xxv2_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im98xxv3_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+              im98xxv3_wvga_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig)
 
 
 eval "IM_DEVICE_NAME_LIST=(${X_IM_DEVICE_NAME_LIST[*]})"
