@@ -1,0 +1,4 @@
+set solib-absolute-prefix /opt/a2-symbols/
+set solib-search-path /opt/a2-symbols/system/lib/
+target remote :12345
+info shared
