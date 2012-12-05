@@ -1,7 +1,10 @@
 #!/bin/sh
 
-pname=system_server
-pid=`adb shell ps | grep $pname | awk '{print $2}'`
+[ "$#" -lt 2 ] && { echo "need arguement, \$1:process_name, \$2:symbols_root_dir"; exit 1; }
+[ ! -e "$2" ] && { echo "symbols_root_dir $2 doesn't exists!"; exit 2; }
+
+pname=$1
+pid=`adb shell ps | grep $pname | head -n 1 | awk '{print $2}'`
 port=12345
 echo "target process: $pname, pid: $pid"
 echo "start target gdbserver"
@@ -12,12 +15,13 @@ adb forward tcp:$port tcp:$port
 
 sleep 3s
 
+
 cat >gdb-cmds <<EOF
-set solib-absolute-prefix /opt/a2-symbols/
-set solib-search-path /opt/a2-symbols/system/lib/
+set solib-absolute-prefix $2
+set solib-search-path $2/system/lib/
 target remote :12345
 info shared
 EOF
 
 echo "start arm-eabi-gdb"
-arm-eabi-gdb -x gdb-cmds iM98xx_evb_v3/symbols/system/bin/app_process
+arm-eabi-gdb -x gdb-cmds $2/system/bin/$1
