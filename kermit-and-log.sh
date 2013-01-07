@@ -53,9 +53,9 @@ done
 kerm_conf=`echo "$kerm_conf" | tr '\n' ','`
 
 log_name=$log_prefix-${serialline##*/}-$baudrate-`date +%Y_%m_%d--%H_%M_%S`.log
-ln -sfT "$log_name"  "$log_prefix-latest.log"
+ln -sfT $log_name  $log_prefix-latest.log
 
-kerm_log_conf="log session '$log_name',c"
+kerm_log_conf="log session $log_name,c"
 kerm_conf="${kerm_conf}${kerm_log_conf}"
 echo "kerm_conf=$kerm_conf\n"
 #return
