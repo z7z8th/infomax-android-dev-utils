@@ -16,9 +16,12 @@ export USE_CCACHE=1
 export CCACHE_DIR=/opt2/ccache-a2.2
 export MAKEFLAGS='-j4'
 
-export PATH=$PATH:$(pwd)/out/host/linux-x86/bin
+export PATH=$PATH:$(pwd)/out/host/linux-x86/bin:$(pwd)/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin
 
-source build/envsetup.sh
+source build/envsetup_bob.sh
+
+return 0
+
 
 { update-alternatives --query java | grep "Value:.*${this_java_dir}"; } && \
     { update-alternatives --query javac | grep "Value:.*${this_java_dir}"; } && \
