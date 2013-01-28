@@ -6,7 +6,7 @@
 ECHO="echo -e"
 warn "\nBuild barebox\n"
 
-export PATH=../prebuilt/linux-x86/toolchain/BSP12_arm-eabi-4.4.0/bin:$PATH
+export PATH=../prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
 export ARCH=arm
 export CROSS_COMPILE=arm-eabi-
 
@@ -21,8 +21,11 @@ EOF
 CONFIG_LIST=( im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
               im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
               im98xxv2_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im98xxv3_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im98xxv3_wvga_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig)
+              im98xxv3_A9-624MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
+              im98xxv3_wvga_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
+              im98xxv4_A9-806MHz-AHB-div3_XM-198MHz_A7-130MHz_defconfig
+              im98xxv4_wvga_A9-806MHz-AHB-div3_XM-198MHz_A7-130MHz_defconfig
+              )
 
 
 eval "IM_DEVICE_NAME_LIST=(${X_IM_DEVICE_NAME_LIST[*]})"
