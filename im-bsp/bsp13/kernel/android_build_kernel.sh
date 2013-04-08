@@ -6,17 +6,19 @@
 ECHO="echo -e"
 warn "\nBuild kernel\n"
 
-# export PATH=../prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
-export PATH=../prebuilt/linux-x86/toolchain/arm-linux-androideabi-4.4.x/bin:$PATH
+export PATH=../prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin:$PATH
+# export PATH=../prebuilt/linux-x86/toolchain/arm-linux-androideabi-4.4.x/bin:$PATH
 export ARCH=arm
-#export CROSS_COMPILE=arm-eabi-
-export CROSS_COMPILE=arm-linux-androideabi-
+export CROSS_COMPILE=arm-eabi-
+# export CROSS_COMPILE=arm-linux-androideabi-
 
 CONFIG_LIST=( im98xxv1_android_defconfig 
               im98xxv1_android_defconfig 
               im98xxv2_android_defconfig 
               im98xxv3_android_defconfig 
-              im98xxv3_wvga_android_defconfig)
+              im98xxv3_wvga_android_defconfig
+              im98xxv4_android_defconfig 
+              im98xxv4_wvga_android_defconfig)
 
 BUILD=""
 BUILD_MODULES="modules"
@@ -71,9 +73,15 @@ make CONFIG_DEBUG_SECTION_MISMATCH=y $BUILD
 
 if [ $? = 0 ]; then
     mkdir -p $ANDROID_PRODUCT_OUT
+    cp arch/arm/boot/zImage ../device/infomax/$TARGET_DEVICE/kernel
     cp arch/arm/boot/zImage $ANDROID_PRODUCT_OUT/kernel
-#    cp arch/arm/boot/zImage ../device/infomax/$TARGET_DEVICE/kernel
-    cp drivers/net/wireless/bcmdhd/bcmdhd.ko ../device/infomax/$TARGET_DEVICE/bcmdhd.ko
+    if [ -e drivers/net/wireless/rda5990p/rda5890.ko ] ; then
+        cp drivers/net/wireless/rda5990p/rda5890.ko ../hardware/im98xx/wlan/rda/rda5990p/module/rda5890.ko
+    fi
+    if [ -e drivers/net/wireless/bcm4329/bcm4329.ko ] ; then
+        cp drivers/net/wireless/bcm4329/bcm4329.ko ../hardware/broadcom/wlan/bcm4329/module/bcm4329.ko
+    fi
+
     git log -n 1 > $ANDROID_PRODUCT_OUT/kernel.version
     $ECHO "\n=== kernel Build Completed Sucessfully. ==="
     $ECHO "=== please find the image at infomax_images ===\n"
