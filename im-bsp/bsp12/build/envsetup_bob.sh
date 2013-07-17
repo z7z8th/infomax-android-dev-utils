@@ -566,10 +566,12 @@ export -f prompt_for_confirm
 
 unset IM_DEVICE_NAME_LIST
 IM_DEVICE_NAME_LIST=( iM9816 
-                iM9828_evb_v1 
-                iM9828_evb_v2 
-                iM9828_evb_v3 
-                iM9828_evb_v3_wvga)
+                iM98xx_evb_v1 
+                iM98xx_evb_v2 
+                iM98xx_evb_v3 
+                iM98xx_evb_v3_wvga
+                iM98xx_evb_v4
+                iM98xx_evb_v4_wvga )
 export X_IM_DEVICE_NAME_LIST=$(printf '%q ' "${IM_DEVICE_NAME_LIST[@]}")
 
 function get_dev_name_index() {
@@ -639,10 +641,13 @@ function bbarebox() {
 }
 
 function fix_blcr(){
+    #return
+    local blcr_run_opt=
     croot
     cd external/$BLCR_VERSION
+    [ "$1" == "-c" ] && { rm .gitignore; git clean -df; git checkout .gitignore; }
     ./run.sh
-    cd ../../
+    croot
 }
 
 function bkernel() {
@@ -665,31 +670,45 @@ function bramdisk() {
     warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
 }
 
-#MKBOOTIMG=out/host/linux-x86/bin/mkbootimg
+MKBOOTIMG=out/host/linux-x86/bin/mkbootimg
+
+function bbootimg() {
+    croot
+    chk_lunch_and_rerun
+    $MKBOOTIMG --kernel $ANDROID_PRODUCT_OUT/kernel --ramdisk $ANDROID_PRODUCT_OUT/ramdisk.img --cmdline "no_console_suspend=1 console=null" --base 0x43800000 --output $ANDROID_PRODUCT_OUT/boot.img
+    local ret=$?
+    warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
+}
+
+function bboot_noup() {
+    croot
+    chk_lunch_and_rerun
+    bkernel $@ || return 1
+    $MKBOOTIMG --kernel $ANDROID_PRODUCT_OUT/kernel --ramdisk $ANDROID_PRODUCT_OUT/ramdisk.img --cmdline "no_console_suspend=1 console=null" --base 0x43800000 --output $ANDROID_PRODUCT_OUT/boot.img
+    local ret=$?
+    warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
+}
 
 function bboot() {
     croot
     chk_lunch_and_rerun
-    [ ! -e "$ANDROID_REL_PRODUCT_OUT/kernel" ] && { 
-        warn "kernel isn't built yet. build now.";
-        bkernel $@;
-    }
+    bkernel $@ || return 1
     make $ANDROID_REL_PRODUCT_OUT/boot.img
     local ret=$?
-    warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
+    warn -n "Build ${FUNCNAME#b} "; [ x$ret = x0 ] && warn "succeed" || warn "failed"
 }
 
 function bsystem() {
     croot
     chk_lunch_and_rerun
-    fix_blcr
     NEED_CONFIRM=1
+    local blcr_run_opt=
     for opt in $@; do [ "$opt" = "-y" ] && { NEED_CONFIRM=0; break; } done
     for opt in $@; do
         case $opt in
-        -c) $ECHO "make clean, will delete out directory"
-            #prompt_for_confirm && make clean
-            prompt_for_confirm && echo "fake make clean" 
+        -c) $ECHO "clean blcr"
+            prompt_for_confirm && echo "clean blcr" 
+            blcr_run_opt=-c
             shift
             ;;
         -y) shift
@@ -702,15 +721,13 @@ function bsystem() {
         esac
     done
 
-    [ ! -e "$ANDROID_REL_PRODUCT_OUT/kernel" ] && { 
-        warn "kernel isn't built yet. build now.";
-        bkernel -y;
-    }
+    fix_blcr $blcr_run_opt
 
     [ -d android_obj ] && sh -x build/rel_obj_put_back.sh
     schedtool -B -n 1 -e ionice -n 1 make $@
     local ret=$?
     warn -n "Build ${FUNCNAME#b} "; [ $ret = 0 ] && warn "succeed" || warn "failed"
+    chmod 755 $ANDROID_REL_PRODUCT_OUT/*.img
     return $ret
 }
 
@@ -745,7 +762,7 @@ function ball() {
         "It will takes a long time."
     prompt_for_confirm &&
     bbarebox $CONFIRM_OPT -c -d &&
-    bboot $CONFIRM_OPT -c -d &&
+    bkernel $CONFIRM_OPT -c -d &&
     bsystem $CONFIRM_OPT -c &&
     warn "All build is succeed!" ||
     warn "Some build is failed! Please check!"
@@ -766,10 +783,10 @@ BLCR_VERSION="blcr-0.8.4"
 function infomax_brunch()
 {
 
-    BOARD_LIST=( iM9816 iM9828_EVB_V1 iM9828_EVB_V2 iM9828_EVB_V3 iM9828_EVB_V3_WVGA)
-    DEVICE_NAME_LIST=( iM9816 iM9828_evb_v1 iM9828_evb_v2 iM9828_evb_v3 iM9828_evb_v3_wvga)
-    ANDROID_BOARD_LIST=( device/infomax/iM9816 device/infomax/iM9828_evb_v1 device/infomax/iM9828_evb_v2 device/infomax/iM9828_evb_v3 device/infomax/iM9828_evb_v3_wvga)
-    ANDROID_SYSTEM_LIST=( generic_iM9816-eng generic_iM9828_evb_v1-eng generic_iM9828_evb_v2-eng generic_iM9828_evb_v3-eng generic_iM9828_evb_v3_wvga-eng)
+    BOARD_LIST=( iM9816 iM98xx_EVB_V1 iM98xx_EVB_V2 iM98xx_EVB_V3 iM98xx_EVB_V3_WVGA)
+    DEVICE_NAME_LIST=( iM9816 iM98xx_evb_v1 iM98xx_evb_v2 iM98xx_evb_v3 iM98xx_evb_v3_wvga)
+    ANDROID_BOARD_LIST=( device/infomax/iM9816 device/infomax/iM98xx_evb_v1 device/infomax/iM98xx_evb_v2 device/infomax/iM98xx_evb_v3 device/infomax/iM98xx_evb_v3_wvga)
+    ANDROID_SYSTEM_LIST=( generic_iM9816-eng generic_iM98xx_evb_v1-eng generic_iM98xx_evb_v2-eng generic_iM98xx_evb_v3-eng generic_iM98xx_evb_v3_wvga-eng)
 
     if [ "$2" ] ; then
         BOARD_NUMBER=$2

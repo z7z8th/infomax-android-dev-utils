@@ -14,9 +14,14 @@ export ANDROID_JAVA_HOME=$JAVA_HOME
 
 export USE_CCACHE=1
 export CCACHE_DIR=/opt2/ccache-a2.2
-export MAKEFLAGS='-j4'
+export MAKEFLAGS='-j3'
 
 export PATH=$PATH:$(pwd)/out/host/linux-x86/bin:$(pwd)/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin
+
+ln -sfT ~/github/dev-utils/im-bsp/bsp12/build/envsetup_bob.sh build/envsetup_bob.sh
+ln -sfT ~/github/dev-utils/im-bsp/bsp12/kernel/android_build_kernel.sh kernel/android_build_kernel.sh
+ln -sfT ~/github/dev-utils/im-bsp/bsp12/barebox/android_build_barebox.sh barebox/android_build_barebox.sh
+rm build/makefile-path.cache
 
 source build/envsetup_bob.sh
 
