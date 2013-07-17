@@ -4,6 +4,7 @@ this_java_ver='6'
 this_java_ver_grep='1\.6\.0'
 this_java_dir="java-${this_java_ver}-sun"
 
+
 #### configs below is not portable, do *not* copy directly ####
 export JAVA_HOME=/usr/lib/jvm/${this_java_dir}
 export JRE_HOME=$JAVA_HOME/jre
@@ -13,9 +14,15 @@ export ANDROID_JAVA_HOME=$JAVA_HOME
 
 export USE_CCACHE=1
 export CCACHE_DIR=/opt2/ccache
-export MAKEFLAGS='-j4'
+export MAKEFLAGS='-j3'
 
 export PATH=$PATH:$(pwd)/out/host/linux-x86/bin:$(pwd)/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/
+
+
+ln -sfT ~/github/dev-utils/im-bsp/bsp13/build/envsetup_bob.sh build/envsetup_bob.sh
+ln -sfT ~/github/dev-utils/im-bsp/bsp13/kernel/android_build_kernel.sh kernel/android_build_kernel.sh
+ln -sfT ~/github/dev-utils/im-bsp/bsp13/barebox/android_build_barebox.sh barebox/android_build_barebox.sh
+rm build/makefile-path.cache
 
 source build/envsetup_bob.sh
 
