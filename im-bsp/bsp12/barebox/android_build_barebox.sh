@@ -11,6 +11,7 @@ export ARCH=arm
 export CROSS_COMPILE=arm-eabi-
 
 cat  >include/git_commit.h  <<EOF
+ 
 #if defined(GIT_COMMIT)
 #define GIT_RELEASE GIT_COMMIT
 #else
@@ -18,14 +19,16 @@ cat  >include/git_commit.h  <<EOF
 #endif
 EOF
 
-CONFIG_LIST=( im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
-              im98xxv2_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig 
+CONFIG_LIST=( im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
+              im98xxv1_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
+              im98xxv2_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
               im98xxv3_A9-624MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
               im98xxv3_wvga_A9-520MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
+              im98xxv3_fwvga_A9-624MHz-AHB-div2_XM-198MHz_A7-143MHz_defconfig
               im98xxv4_A9-806MHz-AHB-div3_XM-198MHz_A7-130MHz_defconfig
               im98xxv4_wvga_A9-806MHz-AHB-div3_XM-198MHz_A7-130MHz_defconfig
-              )
+              im98xxv4_fwvga_A9-806MHz-AHB-div3_XM-198MHz_A7-130MHz_defconfig
+             )
 
 
 eval "IM_DEVICE_NAME_LIST=(${X_IM_DEVICE_NAME_LIST[*]})"

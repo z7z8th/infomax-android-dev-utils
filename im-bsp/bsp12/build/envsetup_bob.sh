@@ -570,8 +570,10 @@ IM_DEVICE_NAME_LIST=( iM9816
                 iM98xx_evb_v2 
                 iM98xx_evb_v3 
                 iM98xx_evb_v3_wvga
+                iM98xx_evb_v3_fwvga
                 iM98xx_evb_v4
-                iM98xx_evb_v4_wvga )
+                iM98xx_evb_v4_wvga
+                iM98xx_evb_v4_fwvga )
 export X_IM_DEVICE_NAME_LIST=$(printf '%q ' "${IM_DEVICE_NAME_LIST[@]}")
 
 function get_dev_name_index() {

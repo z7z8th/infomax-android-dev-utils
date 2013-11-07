@@ -17,8 +17,10 @@ CONFIG_LIST=( im98xxv1_android_defconfig
               im98xxv2_android_defconfig 
               im98xxv3_android_defconfig 
               im98xxv3_wvga_android_defconfig
+              im98xxv3_fwvga_android_defconfig
               im98xxv4_android_defconfig 
-              im98xxv4_wvga_android_defconfig)
+              im98xxv4_wvga_android_defconfig
+              im98xxv4_fwvga_android_defconfig )
 
 BUILD=""
 BUILD_MODULES="modules"
@@ -75,6 +77,8 @@ if [ $? = 0 ]; then
     mkdir -p $ANDROID_PRODUCT_OUT
     cp arch/arm/boot/zImage ../device/infomax/$TARGET_DEVICE/kernel
     cp arch/arm/boot/zImage $ANDROID_PRODUCT_OUT/kernel
+    mkdir -p ../hardware/im98xx/sensors/module/
+    cp drivers/media/video/hippo_camera/*.ko ../hardware/im98xx/sensors/module/
     git log -n 1 > $ANDROID_PRODUCT_OUT/kernel.version
     $ECHO "\n=== kernel Build Completed Sucessfully. ==="
     $ECHO "=== please find the image at infomax_images ===\n"
