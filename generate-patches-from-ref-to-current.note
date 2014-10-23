@@ -1,0 +1,8 @@
+
+
+repo forall -c 'echo;PWD1=${PWD##/src/tinydroid/} PP=/src/tinydroid/tinydroid-patches/`echo $PWD1|tr / _`.diff; git  diff tags/android-4.4.2_r2 tiny-4.4.2_r2 >$PP 2>$PP.err'
+
+
+#delete 0 sized files
+for f in `ls`; do [ `stat -c "%s" $f` -eq 0 ] && rm $f; done
+
